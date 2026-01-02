@@ -11,11 +11,13 @@ erDiagram
         varchar name UK
         varchar slug
         varchar description
+        datetime created_at
     }
     
     users ||--o{ login_tokens : "tem"
     users ||--o{ login_history : "tem"
     users ||--o{ login_attempts : "regista"
+    users ||--o{ login_logs : "regista"
     users ||--o{ user_activity : "tem"
     users ||--o{ favorites : "tem"
     users ||--o{ test_drives : "agenda"
@@ -37,9 +39,12 @@ erDiagram
         varchar totp_secret
         boolean totp_enabled
         varchar remember_token
+        datetime remember_token_expires
         datetime last_login
         boolean is_active
+        varchar blocked_reason
         datetime created_at
+        datetime updated_at
     }
 
     login_tokens {
@@ -48,8 +53,11 @@ erDiagram
         varchar token
         varchar code
         varchar ip_address
+        text user_agent
         boolean is_used
+        datetime used_at
         datetime expires_at
+        datetime created_at
     }
 
     login_history {
@@ -60,6 +68,24 @@ erDiagram
         boolean success
         varchar failure_reason
         datetime login_at
+    }
+
+    login_attempts {
+        int id PK
+        varchar email
+        varchar ip_address
+        text user_agent
+        boolean success
+        datetime created_at
+    }
+
+    login_logs {
+        int id PK
+        int user_id FK
+        varchar ip_address
+        text user_agent
+        varchar action
+        datetime created_at
     }
 
     security_logs {
@@ -73,6 +99,39 @@ erDiagram
         datetime created_at
     }
 
+    activity_logs {
+        int id PK
+        int user_id FK
+        varchar action
+        varchar entity_type
+        int entity_id
+        json old_values
+        json new_values
+        varchar ip_address
+        text user_agent
+        datetime created_at
+    }
+
+    user_activity {
+        int id PK
+        int user_id FK
+        varchar action
+        varchar description
+        varchar ip_address
+        datetime created_at
+    }
+
+    email_history {
+        int id PK
+        int user_id FK
+        varchar to_email
+        varchar subject
+        varchar template
+        enum status
+        datetime sent_at
+        datetime created_at
+    }
+
     %% ===== VEÍCULOS =====
     brands ||--o{ vehicles : "tem"
     brands {
@@ -82,6 +141,7 @@ erDiagram
         int service_interval_km
         int service_interval_months
         boolean is_active
+        datetime created_at
     }
 
     vehicle_types ||--o{ vehicles : "classifica"
@@ -122,6 +182,7 @@ erDiagram
     vehicles ||--o{ favorites : "em"
     vehicles ||--o{ reviews : "sobre"
     vehicles ||--o{ sell_trade_requests : "para"
+    vehicles ||--o{ favorite_sold_notifications : "gera"
     vehicles {
         int id PK
         int brand_id FK
@@ -133,19 +194,26 @@ erDiagram
         varchar model
         varchar version
         year year
+        varchar color
         int mileage
         int doors
         int seats
         int power_hp
+        int engine_cc
         enum transmission
         decimal price
         decimal previous_price
         decimal sold_price
         datetime sold_date
         text description
+        json features
+        varchar vin
+        varchar license_plate
         int views
         boolean is_featured
         boolean is_visible
+        datetime created_at
+        datetime updated_at
     }
 
     vehicle_images {
@@ -155,6 +223,7 @@ erDiagram
         varchar original_name
         boolean is_primary
         int sort_order
+        datetime created_at
     }
 
     features ||--o{ vehicle_features : "em"
@@ -162,6 +231,7 @@ erDiagram
         int id PK
         varchar name UK
         varchar category
+        boolean is_active
     }
 
     vehicle_features {
@@ -170,7 +240,7 @@ erDiagram
         int feature_id FK
     }
 
-    %% ===== FUNCIONALIDADES =====
+    %% ===== RESERVAS / TEST DRIVES =====
     test_drive_status ||--o{ test_drives : "define"
     test_drive_status {
         int id PK
@@ -187,12 +257,26 @@ erDiagram
         time scheduled_time
         text notes
         text admin_notes
+        datetime created_at
+        datetime updated_at
     }
 
+    %% ===== INTERAÇÕES =====
+    favorites ||--o{ favorite_sold_notifications : "gera"
     favorites {
         int id PK
         int user_id FK
         int vehicle_id FK
+        datetime created_at
+    }
+
+    favorite_sold_notifications {
+        int id PK
+        int user_id FK
+        int vehicle_id FK
+        int favorite_id FK
+        boolean notified
+        datetime notified_at
         datetime created_at
     }
 
@@ -204,6 +288,7 @@ erDiagram
         text comment
         enum status
         datetime created_at
+        datetime updated_at
     }
 
     contact_messages ||--o{ contact_replies : "tem"
@@ -217,6 +302,9 @@ erDiagram
         varchar subject
         text message
         boolean is_read
+        datetime read_at
+        varchar ip_address
+        datetime created_at
     }
 
     contact_replies {
@@ -235,6 +323,7 @@ erDiagram
         text message
         varchar link
         boolean is_read
+        datetime read_at
         datetime created_at
     }
 
@@ -251,6 +340,8 @@ erDiagram
         decimal user_counter_offer
         decimal final_price
         text admin_notes
+        datetime created_at
+        datetime updated_at
     }
 
     negotiation_messages {
@@ -274,6 +365,7 @@ erDiagram
         varchar original_name
         int file_size
         text notes
+        datetime created_at
     }
 
     vehicle_maintenance {
@@ -287,6 +379,8 @@ erDiagram
         date service_date
         date next_date
         int next_mileage
+        text notes
+        datetime created_at
     }
 
     maintenance_reminders {
@@ -306,27 +400,32 @@ erDiagram
         varchar name
         varchar phone
         boolean notified
+        datetime notified_at
+        datetime created_at
     }
 
-    %% ===== CONFIGURAÇÕES =====
+    %% ===== SISTEMA / CONFIGURAÇÕES =====
     settings {
         int id PK
         varchar key UK
         text value
         enum type
         varchar description
+        datetime updated_at
     }
 
     site_settings {
         int id PK
         varchar setting_key UK
         text setting_value
+        datetime updated_at
     }
 
     closed_days {
         int id PK
         date date UK
         varchar description
+        datetime created_at
     }
 ```
 
