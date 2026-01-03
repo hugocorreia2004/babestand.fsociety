@@ -41,13 +41,3 @@ references:
     institution:
       name: "ESTG/IPP"
 ```
-
----
-
-### 📝 Passo 4 - Topics no GitHub:
-
-Vai às **Settings** do repositório e adiciona estes topics:
-```
-php, security, owasp, web-security, two-factor-authentication, 
-mariadb, bootstrap, car-dealership, academic-project, csrf-protection,
-xss-prevention, sql-injection-prevention, tls, cloudflare
