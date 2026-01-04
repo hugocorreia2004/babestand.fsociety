@@ -35,6 +35,44 @@ O BabeStand implementa um sistema de autenticação robusto com múltiplas camad
 - Expiração configurável (30 dias por defeito)
 - Cookie com flags `HttpOnly`, `Secure`, `SameSite=Lax`
 
+### Validação de Contexto
+
+O token Remember Me é vinculado ao contexto original de autenticação:
+
+| Parâmetro | Validação |
+|-----------|-----------|
+| Token | Hash SHA-256 válido |
+| IP | Deve corresponder ao original |
+| User-Agent | Deve corresponder ao original |
+| País | Geolocalização via GeoIP |
+```php
+// Verificar se IP e User-Agent correspondem
+$currentIp = getClientIp();
+$currentUserAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+if ($token['ip_address'] !== $currentIp || 
+    $token['user_agent'] !== $currentUserAgent) {
+    
+    SecurityLogger::log($userId, 'remember_me_rejected', 'warning',
+        "País diferente ({$storedCountry} -> {$currentCountry})");
+    
+    // Invalidar token
+    $db->execute("DELETE FROM login_tokens WHERE id = ?", [$token['id']]);
+    return false;
+}
+```
+
+**Proteção**: Mesmo que um atacante roube o cookie `remember_token`, não consegue usá-lo de outro IP ou browser.
+
+### Evidência
+
+![Remember Me Rejected](../validacao/screenshots/remember-me-rejected.png)
+
+A imagem mostra:
+- ✅ `login_remember_me` aceite com IP 10.8.0.10 (VPN)
+- ❌ `remember_me_rejected` quando IP mudou para 62.48.215.39
+- 🔐 Novo `login_totp` obrigatório após rejeição
+
 ### Recuperação de Password
 - Token único por pedido
 - Expiração de 1 hora
