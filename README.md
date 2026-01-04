@@ -2,7 +2,7 @@
 
 # 🚗 BabeStand
 
-<img width="1952" height="2208" alt="Gemini_Generated_Image_9l0r469l0r469l0r" src="https://github.com/user-attachments/assets/3d084acb-a89a-4240-826f-892d0f8840a6" />
+<img width="2816" height="1167" alt="babestand-logo" src="https://github.com/user-attachments/assets/7eac6a77-67b4-4fdb-81da-74ec15405c0f" />
 
 **Sistema de Gestão de Stand Automóvel**
 
